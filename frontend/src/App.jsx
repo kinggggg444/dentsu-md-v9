@@ -153,6 +153,15 @@ export default function App() {
 
   return (
     <div className="app" dir={isRtl ? 'rtl' : 'ltr'}>
+      <video
+        className="bg-video"
+        src="https://files.catbox.moe/v2mp0e.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+      <div className="bg-video-overlay" />
       {/* Particles */}
       <div className="particles">
         {particles.map(p => (

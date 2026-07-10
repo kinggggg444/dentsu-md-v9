@@ -31,6 +31,24 @@ body {
   overflow: hidden;
 }
 
+/* ── Video Background ── */
+.bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  pointer-events: none;
+}
+.bg-video-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7,12,24,0.72);
+  z-index: -1;
+  pointer-events: none;
+}
+
 /* ── Particles ── */
 .particles {
   position: fixed;
