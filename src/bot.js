@@ -55,7 +55,7 @@ async function startSession(number) {
 
   fs.ensureDirSync(sessionPath);
   // Note: on ne supprime jamais les fichiers de session automatiquement
-  // (Render filesystem éphémère — les sessions sont dans SESSION_BASE_PATH)
+  // (Filesystem éphémère sur Railway — les sessions sont dans SESSION_BASE_PATH)
 
   const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
   const version = await getVersion();

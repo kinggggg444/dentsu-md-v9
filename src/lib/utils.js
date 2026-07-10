@@ -81,7 +81,7 @@ function formatMenu(sections) {
 }
 
 function getHost() {
-  return process.env.RENDER_EXTERNAL_URL || os.hostname();
+  return process.env.FRONTEND_URL || process.env.RAILWAY_PUBLIC_DOMAIN || os.hostname();
 }
 
 module.exports = {

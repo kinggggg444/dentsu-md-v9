@@ -81,7 +81,7 @@ async function handle(ctx) {
       const s = Math.floor(uptime % 60);
       await sock.sendMessage(from, {
         image: { url: config.MENU_IMAGE },
-        caption: `✅ *DENTSU MD V9 est en ligne!*\n\n⏱️ Runtime: ${h}h ${m2}m ${s}s\n👤 Sessions actives: ${store.sessionCount()}\n📱 Mode: ${config.MODE}\n🌍 Host: ${process.env.RENDER_EXTERNAL_URL || 'Local'}\n\n${config.BOT_FOOTER}`
+        caption: `✅ *DENTSU MD V9 est en ligne!*\n\n⏱️ Runtime: ${h}h ${m2}m ${s}s\n👤 Sessions actives: ${store.sessionCount()}\n📱 Mode: ${config.MODE}\n🌍 Host: ${process.env.FRONTEND_URL || 'Local'}\n\n${config.BOT_FOOTER}`
       }, { quoted: msg });
       return true;
     }
