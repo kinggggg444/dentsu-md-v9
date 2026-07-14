@@ -126,6 +126,10 @@ async function messageHandler(sock, { messages, type }) {
     isOwner: isOwner(sender),
   };
 
+  // ── MODE gate: en mode "self", seul le owner peut utiliser les commandes ──
+  const ownerMode = (config.MODE || 'public') === 'self';
+  if (ownerMode && !isOwner(sender)) return;
+
   try {
     if (NO_PREFIX_CMDS.has(command)) {
       await sendMainMenu(ctx);

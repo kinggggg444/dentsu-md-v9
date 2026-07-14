@@ -28,7 +28,8 @@ async function isBotAdmin(sock, from) {
 async function isUserAdmin(sock, from, jid) {
   try {
     const meta = await sock.groupMetadata(from);
-    return meta.participants.find(p => p.id === jid)?.admin != null;
+    const norm = j => (j || '').replace(/:(\d+)@/, '@');
+    return meta.participants.find(p => norm(p.id) === norm(jid))?.admin != null;
   } catch { return false; }
 }
 
@@ -82,13 +83,16 @@ async function handleCommand(ctx) {
   const botId = sock.user.id.split(':')[0] + '@s.whatsapp.net';
 
   // Group metadata helpers
+  // Normalize JID: strip multi-device suffix ":X" so "123:5@s.whatsapp.net" → "123@s.whatsapp.net"
+  const normJid = jid => (jid || '').replace(/:(\d+)@/, '@');
+
   let groupMeta = null, participants = [], groupAdmins = false, isAdmin = false;
   if (isGroup) {
     try {
       groupMeta = await sock.groupMetadata(from);
       participants = groupMeta.participants;
-      groupAdmins = participants.find(p => p.id === botId)?.admin != null;
-      isAdmin = participants.find(p => p.id === sender)?.admin != null;
+      groupAdmins = participants.find(p => normJid(p.id) === normJid(botId))?.admin != null;
+      isAdmin = participants.find(p => normJid(p.id) === normJid(sender))?.admin != null;
     } catch (_) {}
   }
 
