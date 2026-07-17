@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://files.catbox.moe/uwcemj.jpg" alt="DENTSU MD V9" width="100%" style="border-radius:16px; max-width:800px"/>
+<img src="https://i.imgur.com/MtOSJqh.jpeg" alt="DENTSU MD V9" width="100%" style="border-radius:16px; max-width:800px"/>
 
 # 🤖 DENTSU MD V9
 
@@ -56,7 +56,7 @@ PREFIX=.
 MODE=public
 OWNER_NUMBER=224624977006
 MAX_SESSIONS=50
-MENU_IMAGE=https://files.catbox.moe/uwcemj.jpg
+MENU_IMAGE=https://i.imgur.com/MtOSJqh.jpeg
 CHANNEL_LINK=https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h
 TELEGRAM=https://t.me/Natsu_or_Dentsu
 NODE_ENV=production
@@ -146,7 +146,7 @@ OWNER_NUMBER=224624977006
 MAX_SESSIONS=50
 
 # ── Médias ────────────────────────────
-MENU_IMAGE=https://files.catbox.moe/uwcemj.jpg
+MENU_IMAGE=https://i.imgur.com/MtOSJqh.jpeg
 
 # ── Liens sociaux ─────────────────────
 CHANNEL_LINK=https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h
