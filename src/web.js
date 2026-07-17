@@ -19,8 +19,15 @@ const corsOptions = {
   credentials: false,
 };
 
+// Middleware CORS brut — s'exécute AVANT tout, headers en dur, ne peut pas échouer
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // politique uniforme pour les preflight
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '../website/views'));
