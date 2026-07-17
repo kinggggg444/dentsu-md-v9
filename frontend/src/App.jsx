@@ -7,7 +7,7 @@ if (!import.meta.env.VITE_API_URL) {
 }
 const BOT_NAME = import.meta.env.VITE_BOT_NAME || 'DENTSU MD V9';
 const DEV_NAME = import.meta.env.VITE_DEV_NAME || 'Natsu Tech';
-const BOT_IMAGE = import.meta.env.VITE_BOT_IMAGE || 'https://files.catbox.moe/uwcemj.jpg';
+const BOT_IMAGE = import.meta.env.VITE_BOT_IMAGE || 'https://i.imgur.com/MtOSJqh.jpeg';
 const CHANNEL_LINK = import.meta.env.VITE_CHANNEL_LINK || 'https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h';
 const GROUP_LINK = import.meta.env.VITE_GROUP_LINK || 'https://chat.whatsapp.com/GtXASqDdchAFvEJ95cQQ0F';
 const TELEGRAM = import.meta.env.VITE_TELEGRAM || 'https://t.me/Natsu_or_Dentsu';
