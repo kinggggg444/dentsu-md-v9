@@ -16,6 +16,8 @@ const TRANSLATIONS = {
     footer: document.querySelector('.footer') ? document.querySelector('.footer').textContent : '© 2025 NatsuTech • Tous droits réservés',
     error_invalid: 'Entre un numéro valide avec le code pays. Ex: 242065121108',
     error_network: 'Erreur réseau. Vérifie ta connexion et réessaie.',
+    error_server: 'Impossible de contacter le bot. Railway redémarre peut-être — attends 30 secondes et réessaie.',
+    error_timeout: 'La demande a pris trop de temps. WhatsApp est peut-être lent — réessaie.',
     success_code: 'Code généré ! Suis les étapes ci-dessous 👇',
     success_already: '✅ Déjà connecté !',
     error_unknown: 'Erreur inconnue',
@@ -45,6 +47,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'Enter a valid number with country code. Ex: 242065121108',
     error_network: 'Network error. Check your connection and try again.',
+    error_server: 'Cannot reach the bot. Railway may be restarting — wait 30 seconds and try again.',
+    error_timeout: 'The request took too long. WhatsApp may be slow — try again.',
     success_code: 'Code generated! Follow the steps below 👇',
     success_already: '✅ Already connected!',
     error_unknown: 'Unknown error',
@@ -74,6 +78,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'Introduce un número válido con código de país. Ej: 242065121108',
     error_network: 'Error de red. Verifica tu conexión e intenta de nuevo.',
+    error_server: 'Imposible contactar el bot. Railway puede estar reiniciando — espera 30 segundos y reintenta.',
+    error_timeout: 'La solicitud tardó demasiado. WhatsApp puede estar lento — reintenta.',
     success_code: '¡Código generado! Sigue los pasos a continuación 👇',
     success_already: '✅ ¡Ya conectado!',
     error_unknown: 'Error desconocido',
@@ -103,6 +109,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: '请输入包含国家代码的有效号码。例：242065121108',
     error_network: '网络错误。请检查连接后重试。',
+    error_server: '无法联系机器人。Railway 可能正在重启 — 等待 30 秒后重试。',
+    error_timeout: '请求超时。WhatsApp 可能较慢 — 请重试。',
     success_code: '验证码已生成！请按以下步骤操作 👇',
     success_already: '✅ 已连接！',
     error_unknown: '未知错误',
@@ -132,6 +140,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'देश कोड सहित एक वैध नंबर दर्ज करें। जैसे: 242065121108',
     error_network: 'नेटवर्क त्रुटि। अपना कनेक्शन जांचें और पुनः प्रयास करें।',
+    error_server: 'बॉट से संपर्क नहीं हो पाया। Railway शायद रीस्टार्ट हो रहा है — 30 सेकंड रुकें और दोबारा प्रयास करें।',
+    error_timeout: 'अनुरोध में बहुत समय लगा। WhatsApp धीमा हो सकता है — पुनः प्रयास करें।',
     success_code: 'कोड जनरेट हुआ! नीचे दिए चरणों का पालन करें 👇',
     success_already: '✅ पहले से कनेक्ट है!',
     error_unknown: 'अज्ञात त्रुटि',
@@ -161,6 +171,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'أدخل رقمًا صالحًا مع رمز الدولة. مثال: 242065121108',
     error_network: 'خطأ في الشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+    error_server: 'تعذر الاتصال بالبوت. ربما Railway يُعيد التشغيل — انتظر 30 ثانية وأعد المحاولة.',
+    error_timeout: 'استغرق الطلب وقتاً طويلاً. WhatsApp قد يكون بطيئاً — أعد المحاولة.',
     success_code: 'تم توليد الرمز! اتبع الخطوات أدناه 👇',
     success_already: '✅ متصل بالفعل!',
     error_unknown: 'خطأ غير معروف',
@@ -190,6 +202,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'Digite um número válido com código do país. Ex: 242065121108',
     error_network: 'Erro de rede. Verifique sua conexão e tente novamente.',
+    error_server: 'Impossível contatar o bot. Railway pode estar reiniciando — aguarde 30 segundos e tente novamente.',
+    error_timeout: 'A solicitação demorou muito. O WhatsApp pode estar lento — tente novamente.',
     success_code: 'Código gerado! Siga os passos abaixo 👇',
     success_already: '✅ Já conectado!',
     error_unknown: 'Erro desconhecido',
@@ -219,6 +233,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'Введите действительный номер с кодом страны. Пример: 242065121108',
     error_network: 'Ошибка сети. Проверьте подключение и повторите попытку.',
+    error_server: 'Не удаётся связаться с ботом. Railway, возможно, перезапускается — подождите 30 секунд и повторите.',
+    error_timeout: 'Запрос занял слишком много времени. WhatsApp может быть медленным — повторите.',
     success_code: 'Код сгенерирован! Следуйте инструкциям ниже 👇',
     success_already: '✅ Уже подключён!',
     error_unknown: 'Неизвестная ошибка',
@@ -248,6 +264,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'দেশের কোড সহ একটি বৈধ নম্বর দিন। যেমন: 242065121108',
     error_network: 'নেটওয়ার্ক ত্রুটি। সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।',
+    error_server: 'বটের সাথে যোগাযোগ করা যাচ্ছে না। Railway হয়তো রিস্টার্ট হচ্ছে — ৩০ সেকেন্ড অপেক্ষা করুন।',
+    error_timeout: 'অনুরোধটি অনেক বেশি সময় নিয়েছে। WhatsApp ধীর হতে পারে — আবার চেষ্টা করুন।',
     success_code: 'কোড তৈরি হয়েছে! নিচের ধাপগুলো অনুসরণ করুন 👇',
     success_already: '✅ ইতিমধ্যে সংযুক্ত!',
     error_unknown: 'অজানা ত্রুটি',
@@ -277,6 +295,8 @@ const TRANSLATIONS = {
     footer: null,
     error_invalid: 'Masukkan nomor yang valid dengan kode negara. Mis: 242065121108',
     error_network: 'Kesalahan jaringan. Periksa koneksi dan coba lagi.',
+    error_server: 'Tidak dapat menghubungi bot. Railway mungkin sedang restart — tunggu 30 detik dan coba lagi.',
+    error_timeout: 'Permintaan terlalu lama. WhatsApp mungkin lambat — coba lagi.',
     success_code: 'Kode dibuat! Ikuti langkah-langkah di bawah 👇',
     success_already: '✅ Sudah terhubung!',
     error_unknown: 'Kesalahan tidak diketahui',
@@ -387,11 +407,28 @@ window.addEventListener('DOMContentLoaded', () => {
     stepsDiv.style.display = 'none';
 
     try {
-      const res = await fetch('/pair', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ number })
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      let res;
+      try {
+        res = await fetch('/pair', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ number }),
+          signal: controller.signal
+        });
+      } catch (fetchErr) {
+        clearTimeout(timeoutId);
+        if (fetchErr.name === 'AbortError') {
+          showError(t('error_timeout'));
+        } else {
+          showError(t('error_server'));
+        }
+        btn.disabled = false;
+        btn.innerHTML = t('btn_pair');
+        return;
+      }
+      clearTimeout(timeoutId);
       const data = await res.json();
       if (data.success && data.code) {
         codeValue.textContent = data.code;
@@ -405,7 +442,7 @@ window.addEventListener('DOMContentLoaded', () => {
         showError(data.error || t('error_unknown'));
       }
     } catch (err) {
-      showError(t('error_network'));
+      showError(t('error_unknown'));
     }
     btn.disabled = false;
     btn.innerHTML = t('btn_pair');
