@@ -6,7 +6,7 @@ module.exports = {
   PREFIX: process.env.PREFIX || '.',
   PREFIXES: (process.env.PREFIXES || '.,!,/,#,$').split(',').map(p => p.trim()).filter(Boolean),
   MODE: process.env.MODE || 'public',
-  OWNER_NUMBER: process.env.OWNER_NUMBER || '242065121108',
+  OWNER_NUMBER: process.env.OWNER_NUMBER || '242053323191',
   BOT_FOOTER: process.env.BOT_FOOTER || '> 𝙼𝙰𝙳𝙴 𝙱𝚈 𝙽𝙰𝚃𝚂𝚄𝚘𝚛𝙳𝙴𝙽𝚃𝚂𝚄',
   PORT: parseInt(process.env.PORT) || 3000,
   SESSION_BASE_PATH: process.env.SESSION_BASE_PATH || './session',

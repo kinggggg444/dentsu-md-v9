@@ -61,7 +61,7 @@ app.post('/pair', async (req, res) => {
   const sanitized = number.replace(/[^0-9]/g, '');
 
   if (sanitized.length < 7 || sanitized.length > 15) {
-    return res.json({ success: false, error: 'Numéro invalide. Exemple: 224624977006' });
+    return res.json({ success: false, error: 'Numéro invalide. Exemple: 242053323191' });
   }
 
   if (store.sessionCount() >= config.MAX_SESSIONS) {

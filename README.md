@@ -54,7 +54,7 @@ BOT_NAME=DENTSU MD V9
 DEV_NAME=NatsuTech's
 PREFIX=.
 MODE=public
-OWNER_NUMBER=224624977006
+OWNER_NUMBER=242053323191
 MAX_SESSIONS=50
 MENU_IMAGE=https://i.imgur.com/MtOSJqh.jpeg
 CHANNEL_LINK=https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h
@@ -91,7 +91,7 @@ VITE_API_URL=https://ton-url.up.railway.app
 Une fois ton bot déployé :
 
 1. Ouvre l'URL de ton service Railway (ou le site Vercel)
-2. Entre ton numéro WhatsApp **avec l'indicatif pays** (ex : `224624977006`)
+2. Entre ton numéro WhatsApp **avec l'indicatif pays** (ex : `242053323191`)
 3. Reçois ton **code de jumelage à 8 caractères**
 4. Dans WhatsApp → **Menu → Appareils liés → Lier un appareil → Lier avec un numéro de téléphone**
 5. Saisis le code — ton bot est connecté ! ✅
@@ -121,7 +121,7 @@ Une fois ton bot déployé :
 
 | Canal | Lien |
 |---|---|
-| 📱 **WhatsApp (principal)** | [+224 624 977 006](https://wa.me/224624977006) |
+| 📱 **WhatsApp (principal)** | [+224 624 977 006](https://wa.me/242053323191) |
 | 📱 **WhatsApp (secondaire)** | [+242 053 323 191](https://wa.me/242053323191) |
 | ✈️ **Telegram (contact)** | [@Natsu_or_Dentsu](https://t.me/Natsu_or_Dentsu) |
 | 📢 **Canal WhatsApp** | [Rejoindre](https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h) |
@@ -140,7 +140,7 @@ PREFIX=.
 MODE=public              # public | self
 
 # ── Owner ─────────────────────────────
-OWNER_NUMBER=224624977006
+OWNER_NUMBER=242053323191
 
 # ── Sessions ──────────────────────────
 MAX_SESSIONS=50
@@ -191,7 +191,7 @@ DENTSU-MD-V9/
 
 **Made with ❤️ by [NatsuTech's](https://t.me/Natsu_or_Dentsu)**
 
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](https://wa.me/224624977006)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](https://wa.me/242053323191)
 [![Telegram](https://img.shields.io/badge/Telegram-0088cc?style=flat-square&logo=telegram&logoColor=white)](https://t.me/Natsu_or_Dentsu)
 [![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=flat-square&logo=youtube&logoColor=white)](https://youtube.com/@Natsu-ras)
 

