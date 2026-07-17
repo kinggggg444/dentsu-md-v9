@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { translations, langMeta } from './i18n.js';
 
-const API_URL = import.meta.env.VITE_API_URL || '';
-if (!import.meta.env.VITE_API_URL) {
-  console.warn('[DENTSU] VITE_API_URL non défini — les appels API échoueront en production. Ajoute-le dans les variables Vercel.');
-}
+// Proxy Netlify : le browser appelle /api/* → Netlify redirige vers Railway (pas de CORS)
+const API_URL = '/api';
 const BOT_NAME = import.meta.env.VITE_BOT_NAME || 'DENTSU MD V9';
 const DEV_NAME = import.meta.env.VITE_DEV_NAME || 'Natsu Tech';
 const BOT_IMAGE = import.meta.env.VITE_BOT_IMAGE || 'https://i.imgur.com/MtOSJqh.jpeg';
