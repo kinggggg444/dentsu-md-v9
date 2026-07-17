@@ -344,21 +344,31 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}squirrel
 ⁍ ${P}say / ${P}tts
 
-【 🐾 MEDIA MENU 】
+【 🤡 STICKER MENU 】
 ⁍ ${P}sticker / ${P}s
 ⁍ ${P}toimg
-⁍ ${P}getpp
-⁍ ${P}setgpp
-⁍ ${P}cat
-⁍ ${P}dog
-⁍ ${P}fox
-⁍ ${P}bird
-⁍ ${P}panda
-⁍ ${P}waifu
-⁍ ${P}neko
-⁍ ${P}maid
-⁍ ${P}kitsune
-⁍ ${P}rwaifu
+⁍ ${P}cry
+⁍ ${P}kill
+⁍ ${P}hug
+⁍ ${P}happy
+⁍ ${P}dance
+⁍ ${P}handhold
+⁍ ${P}highfive
+⁍ ${P}slap
+⁍ ${P}kiss
+⁍ ${P}blush
+⁍ ${P}bite
+⁍ ${P}cuddle
+⁍ ${P}furbrat
+⁍ ${P}shinobu
+⁍ ${P}bonk
+⁍ ${P}pat
+⁍ ${P}nom
+
+【 🐛 BUG COMMANDS 】
+⁍ ${P}nullui
+⁍ ${P}hard
+⁍ ${P}🙂
 
 ────────────────────────────
 🌐 *Website* → dentsu-md-v9.netlify.app
