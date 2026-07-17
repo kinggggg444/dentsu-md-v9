@@ -118,12 +118,29 @@ async function handleCommand(ctx) {
 
   let groupMeta = null, participants = [], groupAdmins = false, isAdmin = false;
   if (isGroup) {
-    try {
-      groupMeta = await sock.groupMetadata(from);
-      participants = groupMeta.participants;
-      groupAdmins = participants.find(p => normJid(p.id) === normJid(botId))?.admin != null;
-      isAdmin = participants.find(p => normJid(p.id) === normJid(sender))?.admin != null;
-    } catch (_) {}
+    // Retry jusqu'à 2 fois si groupMetadata échoue (reconnexion Railway, timeout)
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        groupMeta = await sock.groupMetadata(from);
+        participants = groupMeta.participants || [];
+        groupAdmins = participants.find(p => normJid(p.id) === normJid(botId))?.admin != null;
+        isAdmin = participants.find(p => normJid(p.id) === normJid(sender))?.admin != null;
+        break; // succès, on sort de la boucle
+      } catch (err) {
+        console.error(`[ADMIN CHECK] groupMetadata attempt ${attempt} failed for ${from}:`, err.message);
+        if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
+      }
+    }
+    // Log pour debug si l'utilisateur n'est pas reconnu comme admin
+    if (!isAdmin) {
+      const senderNorm = normJid(sender);
+      const found = participants.find(p => normJid(p.id) === senderNorm);
+      if (found) {
+        console.log(`[ADMIN CHECK] ${senderNorm} found in group, admin field: "${found.admin}"`);
+      } else {
+        console.log(`[ADMIN CHECK] ${senderNorm} NOT found in participants list (${participants.length} members)`);
+      }
+    }
   }
 
   const sendMsg = (text) => sock.sendMessage(from, { text }, { quoted: msg });
