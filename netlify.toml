@@ -2,3 +2,14 @@
   base = "frontend"
   command = "npm run build"
   publish = "frontend/dist"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://dentsu-md-v9-production-44b5.up.railway.app/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
