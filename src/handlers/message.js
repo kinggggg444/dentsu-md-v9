@@ -173,8 +173,11 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}tagadmins
 ⁍ ${P}tag
 ⁍ ${P}hidetag
+⁍ ${P}totag
+⁍ ${P}everyone
 ⁍ ${P}opengc
 ⁍ ${P}closegc
+⁍ ${P}creategroup / ${P}creategc
 ⁍ ${P}kickall
 ⁍ ${P}kickall2
 ⁍ ${P}kick
@@ -185,8 +188,9 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}unmute
 ⁍ ${P}grouplink
 ⁍ ${P}resetlink
-⁍ ${P}listadmin
+⁍ ${P}listadmin / ${P}admin
 ⁍ ${P}listonline
+⁍ ${P}members
 ⁍ ${P}opentime
 ⁍ ${P}closetime
 ⁍ ${P}antilink
@@ -198,9 +202,7 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}subject
 ⁍ ${P}join
 ⁍ ${P}left
-⁍ ${P}creategroup
 ⁍ ${P}setgpp
-⁍ ${P}everyone
 ⁍ ${P}announce
 ⁍ ${P}hijack
 
@@ -231,8 +233,7 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}qc
 
 【 🧠 AI MENU 】
-⁍ ${P}ai
-⁍ ${P}gpt
+⁍ ${P}ai / ${P}gpt
 ⁍ ${P}gpt4
 ⁍ ${P}gpt5
 ⁍ ${P}metaai
@@ -262,6 +263,9 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}urban
 ⁍ ${P}inspire
 ⁍ ${P}ascii
+⁍ ${P}gamefact
+⁍ ${P}mathfact
+⁍ ${P}horoscope
 
 【 🎮 GAME MENU 】
 ⁍ ${P}rps
@@ -282,6 +286,20 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}apk
 ⁍ ${P}shorturl
 ⁍ ${P}catbox
+⁍ ${P}tomp4
+⁍ ${P}tomp3
+
+【 🔍 SEARCH & UTILS MENU 】
+⁍ ${P}weather
+⁍ ${P}wiki
+⁍ ${P}movie
+⁍ ${P}define / ${P}dictionary
+⁍ ${P}currency
+⁍ ${P}recipe
+⁍ ${P}calculate / ${P}calc
+⁍ ${P}qrcode
+⁍ ${P}iplookup
+⁍ ${P}genpass
 
 【 ✨ EPHOTO MENU 】
 ⁍ ${P}glitchtext
@@ -316,7 +334,7 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}createlogo
 ⁍ ${P}lighteffects
 
-【 ♉ LOGO MENU 】
+【 🎨 GFX MENU 】
 ⁍ ${P}gfx
 ⁍ ${P}gfx2
 ⁍ ${P}gfx3
@@ -344,28 +362,60 @@ async function sendMainMenu(ctx) {
 ⁍ ${P}squirrel
 ⁍ ${P}say / ${P}tts
 
+【 😂 EMOJIS MENU 】
+⁍ ${P}cry
+⁍ ${P}kiss
+⁍ ${P}hug
+⁍ ${P}pat
+⁍ ${P}lick
+⁍ ${P}bite
+⁍ ${P}bonk
+⁍ ${P}wink
+⁍ ${P}nom
+⁍ ${P}slap
+⁍ ${P}smile
+⁍ ${P}wave
+⁍ ${P}blush
+⁍ ${P}glomp
+⁍ ${P}happy
+⁍ ${P}dance
+⁍ ${P}cuddle
+⁍ ${P}highfive
+⁍ ${P}handhold
+⁍ ${P}kill
+⁍ ${P}poke
+⁍ ${P}yeet
+⁍ ${P}bully
+⁍ ${P}awoo
+⁍ ${P}smug
+⁍ ${P}cringe
+⁍ ${P}furbrat
+⁍ ${P}shinobu
+
+【 🐾 ANIME & RANDOM MENU 】
+⁍ ${P}waifu
+⁍ ${P}neko
+⁍ ${P}maid
+⁍ ${P}kitsune
+⁍ ${P}rwaifu
+⁍ ${P}animegirl
+⁍ ${P}cat
+⁍ ${P}dog
+⁍ ${P}fox
+⁍ ${P}bird
+⁍ ${P}panda
+⁍ ${P}koala
+
 【 🤡 STICKER MENU 】
 ⁍ ${P}sticker / ${P}s
 ⁍ ${P}toimg
-⁍ ${P}cry
-⁍ ${P}kill
-⁍ ${P}hug
-⁍ ${P}happy
-⁍ ${P}dance
-⁍ ${P}handhold
-⁍ ${P}highfive
-⁍ ${P}slap
-⁍ ${P}kiss
-⁍ ${P}blush
-⁍ ${P}bite
-⁍ ${P}cuddle
-⁍ ${P}furbrat
-⁍ ${P}shinobu
-⁍ ${P}bonk
-⁍ ${P}pat
-⁍ ${P}nom
 
-【 🐛 BUG COMMANDS 】
+【 💀 BUG MENU 】
+⁍ ${P}bug-andro
+⁍ ${P}kill-ui
+⁍ ${P}freezer-ui
+⁍ ${P}dentsu-aple
+⁍ ${P}nullgc
 ⁍ ${P}nullui
 ⁍ ${P}hard
 ⁍ ${P}🙂
@@ -373,7 +423,7 @@ async function sendMainMenu(ctx) {
 ────────────────────────────
 🌐 *Website* → dentsu-md-v9.netlify.app
 📋 *Prefix* → ${P}
-> _Powered by DENTSU MD V9 🤖_`;
+> _Powered by DENTSU MD V9 🤖_`
 
   try {
     await sock.sendMessage(from, {
