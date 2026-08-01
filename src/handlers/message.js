@@ -1,5 +1,5 @@
 const config = require('../config');
-const { getContentType } = require('baileys');
+const { getContentType } = require('@trashcore/baileys');
 const { getTime, getDate, getRam, getUptime } = require('../lib/utils');
 const { isOwner } = require('../lib/utils');
 const { handleCommand } = require('../commands');

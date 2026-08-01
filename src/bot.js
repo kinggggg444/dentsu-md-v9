@@ -6,7 +6,7 @@ const {
   makeCacheableSignalKeyStore,
   Browsers,
   delay,
-} = require('baileys');
+} = require('@trashcore/baileys');
 
 // Codes qui déclenchent reconnexion (pas logout)
 const RECONNECT_CODES = new Set([405, 408, 503, 428, 500, 502]);

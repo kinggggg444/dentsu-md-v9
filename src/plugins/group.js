@@ -1,5 +1,5 @@
 const config = require('../config');
-const { delay } = require('baileys');
+const { delay } = require('@trashcore/baileys');
 
 const GROUP_MENU = `
 ╔══════════════════════╗

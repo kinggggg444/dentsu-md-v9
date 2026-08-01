@@ -1,5 +1,5 @@
 const config = require('../config');
-const { delay } = require('baileys');
+const { delay } = require('@trashcore/baileys');
 
 async function setupStatusHandlers(sock) {
   sock.ev.on('messages.upsert', async ({ messages }) => {

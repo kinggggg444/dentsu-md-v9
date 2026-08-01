@@ -1,6 +1,6 @@
 const config = require('../config');
 const fs = require('fs-extra');
-const { delay } = require('baileys');
+const { delay } = require('@trashcore/baileys');
 const store = require('../lib/store');
 
 const OWNER_MENU = `

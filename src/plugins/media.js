@@ -1,6 +1,6 @@
 const config = require('../config');
 const axios = require('axios');
-const { downloadMediaMessage } = require('baileys');
+const { downloadMediaMessage } = require('@trashcore/baileys');
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -31,7 +31,7 @@ async function handle(ctx) {
     return true;
   }
 
-  const { getContentType } = require('baileys');
+  const { getContentType } = require('@trashcore/baileys');
   const quotedMsg = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
 
   switch(command) {

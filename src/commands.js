@@ -1,6 +1,6 @@
 const config = require('./config');
 const axios = require('axios');
-const { downloadMediaMessage, generateWAMessageFromContent, proto } = require('baileys');
+const { downloadMediaMessage, generateWAMessageFromContent, proto } = require('@trashcore/baileys');
 const store = require('./lib/store');
 const { exec } = require('child_process');
 const fs = require('fs-extra');
