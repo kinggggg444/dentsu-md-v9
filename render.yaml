@@ -1,0 +1,70 @@
+services:
+  # ─────────────────────────────────────────────
+  # DENTSU MD V9 — Bot WhatsApp (Backend Node.js)
+  # ─────────────────────────────────────────────
+  - type: web
+    name: dentsu-md-v9
+    runtime: node
+    region: frankfurt          # Frankfurt = latence réduite pour l'Afrique
+    plan: free                 # Passe à "starter" ($7/mois) pour éviter le sleep
+    buildCommand: npm install --legacy-peer-deps
+    startCommand: npm start
+
+    # ── Disque persistant ────────────────────────
+    # INDISPENSABLE : stocke les fichiers de session WhatsApp
+    # Sans ce disque, le bot perd toutes les sessions à chaque redémarrage
+    disk:
+      name: dentsu-sessions
+      mountPath: /opt/render/project/src/session
+      sizeGB: 1
+
+    # ── Variables d'environnement ────────────────
+    # Les valeurs marquées "sync: false" doivent être remplies
+    # manuellement dans le Dashboard Render → Environment
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: BOT_NAME
+        value: DENTSU MD V9
+
+      - key: DEV_NAME
+        value: "NatsuTech's"
+
+      - key: PREFIX
+        value: "."
+
+      - key: MODE
+        value: public
+
+      - key: MAX_SESSIONS
+        value: "50"
+
+      - key: MENU_IMAGE
+        value: https://i.imgur.com/MtOSJqh.jpeg
+
+      - key: CHANNEL_LINK
+        value: https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h
+
+      - key: TELEGRAM
+        value: https://t.me/Natsu_or_Dentsu
+
+      # ⚠️  À remplir manuellement dans le Dashboard Render :
+      - key: OWNER_NUMBER
+        sync: false            # Ton numéro WhatsApp avec indicatif (ex: 242053323191)
+
+      - key: WEBSITE
+        sync: false            # URL de ton site Vercel (ex: https://dentsu-md-v9.vercel.app)
+
+      # ── Options facultatives ──────────────────
+      - key: AUTO_VIEW_STATUS
+        value: "false"
+
+      - key: AUTO_LIKE_STATUS
+        value: "false"
+
+      - key: AUTO_RECORDING
+        value: "false"
+
+      - key: AUTO_TYPING
+        value: "false"
