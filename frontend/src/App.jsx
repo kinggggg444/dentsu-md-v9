@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { translations, langMeta } from './i18n.js';
 
-// Proxy Netlify : le browser appelle /api/* → Netlify redirige vers Railway (pas de CORS)
+// Proxy Netlify : le browser appelle /api/* → Netlify redirige vers Railway
 const API_URL = '/api';
 const BOT_NAME = import.meta.env.VITE_BOT_NAME || 'DENTSU MD V9';
 const DEV_NAME = import.meta.env.VITE_DEV_NAME || 'Natsu Tech';
@@ -10,6 +10,9 @@ const CHANNEL_LINK = import.meta.env.VITE_CHANNEL_LINK || 'https://whatsapp.com/
 const GROUP_LINK = import.meta.env.VITE_GROUP_LINK || 'https://chat.whatsapp.com/GtXASqDdchAFvEJ95cQQ0F';
 const TELEGRAM = import.meta.env.VITE_TELEGRAM || 'https://t.me/Natsu_or_Dentsu';
 const MAX_SESSIONS = parseInt(import.meta.env.VITE_MAX_SESSIONS || '50');
+
+// Durée de validité du code de jumelage (5 min)
+const CODE_EXPIRY_MS = 5 * 60 * 1000;
 
 function FlagImg({ code, size = 24 }) {
   const h = size === 24 ? 18 : 36;
@@ -41,6 +44,34 @@ function TgIcon() {
   );
 }
 
+// Timer qui compte à rebours depuis CODE_EXPIRY_MS
+function useCountdown(active) {
+  const [remaining, setRemaining] = useState(CODE_EXPIRY_MS);
+  const startRef = useRef(null);
+
+  useEffect(() => {
+    if (!active) {
+      setRemaining(CODE_EXPIRY_MS);
+      startRef.current = null;
+      return;
+    }
+    startRef.current = Date.now();
+    const tick = setInterval(() => {
+      const elapsed = Date.now() - startRef.current;
+      const left = Math.max(0, CODE_EXPIRY_MS - elapsed);
+      setRemaining(left);
+      if (left === 0) clearInterval(tick);
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [active]);
+
+  const minutes = Math.floor(remaining / 60000);
+  const seconds = Math.floor((remaining % 60000) / 1000);
+  const expired = remaining === 0;
+  const pct = (remaining / CODE_EXPIRY_MS) * 100;
+  return { minutes, seconds, expired, pct };
+}
+
 export default function App() {
   const [lang, setLang] = useState('fr');
   const [showLangOverlay, setShowLangOverlay] = useState(true);
@@ -49,9 +80,12 @@ export default function App() {
   const [code, setCode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [copied, setCopied] = useState(false);
-  const [sessions, setSessions] = useState(0);
+  const [sessions, setSessions] = useState(null);
   const [particles, setParticles] = useState([]);
+  const [showLangSwitcher, setShowLangSwitcher] = useState(false);
   const inputRef = useRef(null);
+
+  const { minutes, seconds, expired, pct } = useCountdown(step === 'success');
 
   const t = translations[lang] || translations.fr;
   const isRtl = lang === 'ar';
@@ -62,9 +96,9 @@ export default function App() {
       setLang(saved);
       setShowLangOverlay(false);
     }
-    // Fetch sessions
     fetchSessions();
-    // Generate particles
+    // Refresh sessions count toutes les 30s
+    const interval = setInterval(fetchSessions, 30000);
     setParticles(Array.from({ length: 20 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
@@ -73,6 +107,7 @@ export default function App() {
       duration: Math.random() * 10 + 8,
       delay: Math.random() * 5,
     })));
+    return () => clearInterval(interval);
   }, []);
 
   const fetchSessions = async () => {
@@ -80,7 +115,7 @@ export default function App() {
       const r = await fetch(`${API_URL}/status`);
       if (r.ok) {
         const d = await r.json();
-        setSessions(d.count || 0);
+        setSessions(d.count ?? 0);
       }
     } catch {}
   };
@@ -89,6 +124,7 @@ export default function App() {
     setLang(code);
     localStorage.setItem('dentsu-lang', code);
     setShowLangOverlay(false);
+    setShowLangSwitcher(false);
   };
 
   const handlePair = async (e) => {
@@ -160,6 +196,7 @@ export default function App() {
         playsInline
       />
       <div className="bg-video-overlay" />
+
       {/* Particles */}
       <div className="particles">
         {particles.map(p => (
@@ -182,7 +219,7 @@ export default function App() {
       <div className="blob blob-1" />
       <div className="blob blob-2" />
 
-      {/* Language Overlay */}
+      {/* Language Overlay (initial) */}
       {showLangOverlay && (
         <div className="lang-overlay">
           <div className="lang-card">
@@ -202,9 +239,40 @@ export default function App() {
         </div>
       )}
 
+      {/* Language switcher popup */}
+      {showLangSwitcher && !showLangOverlay && (
+        <div className="lang-switcher-overlay" onClick={() => setShowLangSwitcher(false)}>
+          <div className="lang-switcher-popup" onClick={e => e.stopPropagation()}>
+            <div className="lang-grid">
+              {langMeta.map(l => (
+                <button key={l.code} className={`flag-btn ${lang === l.code ? 'active' : ''}`} onClick={() => selectLang(l.code)} title={l.name}>
+                  <FlagImg code={l.flag} size={48} />
+                  <span>{l.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main */}
       {!showLangOverlay && (
         <div className="container">
+
+          {/* Top bar: lang switcher button + sessions */}
+          <div className="topbar">
+            <button className="lang-toggle-btn" onClick={() => setShowLangSwitcher(v => !v)} title="Changer de langue">
+              <FlagImg code={langMeta.find(l => l.code === lang)?.flag || 'fr'} size={24} />
+              <span>▾</span>
+            </button>
+            {sessions !== null && (
+              <div className="sessions-badge">
+                <span className="stat-dot" />
+                {sessions}/{MAX_SESSIONS} {t.sessions}
+              </div>
+            )}
+          </div>
+
           {/* Header */}
           <header className="header">
             <div className="bot-img-wrap">
@@ -252,6 +320,7 @@ export default function App() {
                 <div className="spinner" />
                 <p className="loading-text">{t.btnLoading}</p>
                 <p className="loading-num">📱 +{number.replace(/[^0-9]/g, '')}</p>
+                <p className="loading-hint">⏳ Connexion à WhatsApp... (~15s)</p>
               </div>
             )}
 
@@ -260,6 +329,7 @@ export default function App() {
                 <div className="success-icon">✅</div>
                 <h2 className="card-title">{t.successTitle}</h2>
                 <p className="card-sub">{t.successSub}</p>
+
                 <div className="code-box">
                   <span className="code-text">{code}</span>
                   <button className={`copy-btn ${copied ? 'copied' : ''}`} onClick={handleCopy} type="button">
@@ -270,6 +340,17 @@ export default function App() {
                     )}
                   </button>
                 </div>
+
+                {/* Timer d'expiration */}
+                <div className="expiry-bar-wrap">
+                  <div className="expiry-bar" style={{ width: `${pct}%`, background: expired ? '#ff4d4d' : pct < 30 ? '#ffaa00' : '#25D366' }} />
+                </div>
+                <p className={`expiry-text ${expired ? 'expired' : pct < 30 ? 'warn' : ''}`}>
+                  {expired
+                    ? '⚠️ Code expiré — génère un nouveau code'
+                    : `⏱ Code valable encore ${minutes}:${String(seconds).padStart(2, '0')}`}
+                </p>
+
                 <div className="steps-list">
                   {[t.step1, t.step2, t.step3, t.step4].map((s, i) => (
                     <div key={i} className="step-item">

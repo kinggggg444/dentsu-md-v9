@@ -25,21 +25,35 @@ const watchdogs = new Map();
 
 const FALLBACK_VERSION = [2, 3000, 1023596128];
 
-// Attendre que le WebSocket soit en état 'connecting' (prêt pour le pairing code)
-// Timeout en ms, rejette si la connexion se ferme avant
-function waitForConnecting(sock, timeoutMs = 20000) {
+// Attendre que le WebSocket soit en état 'connecting' ou 'open'
+// Nettoie correctement le listener après résolution/rejet
+function waitForConnecting(sock, timeoutMs = 25000) {
   return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error('WebSocket connection timeout')), timeoutMs);
-    const handler = sock.ev.on('connection.update', ({ connection }) => {
+    let settled = false;
+
+    const settle = (fn, val) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(t);
+      // Retirer le listener
+      try { sock.ev.off('connection.update', handler); } catch (_) {}
+      fn(val);
+    };
+
+    const t = setTimeout(
+      () => settle(reject, new Error('WebSocket connection timeout')),
+      timeoutMs
+    );
+
+    const handler = ({ connection }) => {
       if (connection === 'connecting' || connection === 'open') {
-        clearTimeout(t);
-        // Pas de unsubscribe nécessaire, le handler principal prend le relais
-        resolve();
+        settle(resolve, undefined);
       } else if (connection === 'close') {
-        clearTimeout(t);
-        reject(new Error('Connection Closed before pairing code'));
+        settle(reject, new Error('Connection closed before pairing code'));
       }
-    });
+    };
+
+    sock.ev.on('connection.update', handler);
   });
 }
 
@@ -69,13 +83,61 @@ function clearWatchdog(sanitized) {
   }
 }
 
+// Envoyer le message de bienvenue avec retry (3 tentatives)
+async function sendWelcomeMessage(sock, sanitized) {
+  const selfJid = sanitized + '@s.whatsapp.net';
+  const pushName = sock.user?.name || sock.user?.verifiedName || sanitized;
+
+  const now = new Date();
+  const date = now.toLocaleDateString('fr-FR', {
+    day: '2-digit', month: '2-digit', year: 'numeric'
+  });
+  const heure = now.toLocaleTimeString('fr-FR', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+
+  const welcome =
+`╔══════════════╗
+║ *DENTSU MD* 🤖 ✅ ║
+╚══════════════╝
+
+🎉 *Connexion réussie !*
+
+👤 *Nom:* ${pushName}
+📱 *Numéro:*  +${sanitized}
+⚙️ *Préfixe:* . ! # / $ , ; - + (ou sans préfixe)
+📦 *Version:* 9.0.0
+📅 *Date:* ${date} à ${heure}
+
+👑 *Owner:* NatsuTech's
+💬 *Telegram:* https://t.me/Natsu_or_Dentsu
+
+📢 *Canal WhatsApp:*
+🔗 https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h
+
+> _Tape .help pour les commandes_
+> _*DENTSU MD* est en ligne !_ 🚀`;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await sock.sendPresenceUpdate('available');
+      await delay(500);
+      await sock.sendMessage(selfJid, { text: welcome });
+      console.log(`[${sanitized}] ✅ Message de bienvenue envoyé (tentative ${attempt})`);
+      return; // succès
+    } catch (err) {
+      console.warn(`[${sanitized}] ⚠️ Message de bienvenue échec tentative ${attempt}:`, err.message);
+      if (attempt < 3) await delay(3000 * attempt);
+    }
+  }
+  console.error(`[${sanitized}] ❌ Message de bienvenue impossible après 3 tentatives`);
+}
+
 async function startSession(number) {
   const sanitized = number.replace(/[^0-9]/g, '');
   const sessionPath = path.join(config.SESSION_BASE_PATH, sanitized);
 
   fs.ensureDirSync(sessionPath);
-  // Note: on ne supprime jamais les fichiers de session automatiquement
-  // (Filesystem éphémère sur Railway — les sessions sont dans SESSION_BASE_PATH)
 
   const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
   const version = await getVersion();
@@ -156,52 +218,17 @@ async function startSession(number) {
     const { connection, lastDisconnect } = update;
 
     if (connection === 'open') {
-      console.log(`[${sanitized}] ✅ Connected!`);
+      console.log(`[${sanitized}] ✅ Connecté !`);
       pendingSockets.delete(sanitized);
       store.setSession(sanitized, { sock, number: sanitized, connectedAt: Date.now() });
 
-      // FIX: Annonce présence immédiatement → WhatsApp route les messages au bot dès maintenant
+      // Annoncer présence immédiatement
       try { await sock.sendPresenceUpdate('available'); } catch (_) {}
 
-      // ── MESSAGE DE BIENVENUE (envoyé au proprio dès connexion) ──
-      setTimeout(async () => {
-        try {
-          const now = new Date();
-          const date = now.toLocaleDateString('fr-FR', {
-            day: '2-digit', month: '2-digit', year: 'numeric'
-          });
-          const heure = now.toLocaleTimeString('fr-FR', {
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-          });
-          const pushName = sock.user?.name || sock.user?.verifiedName || sanitized;
-          const selfJid = sanitized + '@s.whatsapp.net';
-          const welcome =
-`╔══════════════╗
-║ *DENTSU MD* 🤖 ✅ ║
-╚══════════════╝
-
-🎉 *Connection successful!*
-
-👤 *Name:* ${pushName}
-📱 *Number:*  +${sanitized}
-⚙️ *Prefix:* . ! # / $ , ; - + (or no-prefix)
-📦 *Version:* 8.0.0
-
-👑 *Owner:* NatsuTech's
-💬 *Telegram:* https://t.me/Natsu_or_Dentsu
-
-📢 *WhatsApp Channels:*
-🔗 https://whatsapp.com/channel/0029VbC1s7fFnSz1YhZYc01h
-
-> _Type .help for commands_
-> _*DENTSU MD* is online!_ 🚀`;
-          await sock.sendMessage(selfJid, { text: welcome });
-        } catch (_) {}
-      }, 2500);
+      // Message de bienvenue avec délai suffisant pour stabiliser la connexion
+      setTimeout(() => sendWelcomeMessage(sock, sanitized), 5000);
 
       // ── WATCHDOG: détecte les connexions zombie ───────────────
-      // Toutes les 45s, envoie un ping léger à WhatsApp.
-      // Si ça échoue, la session est zombie → reconnexion forcée.
       clearWatchdog(sanitized);
       let _wdFails = 0;
       const wd = setInterval(async () => {
@@ -211,12 +238,11 @@ async function startSession(number) {
             sock.sendPresenceUpdate('available'),
             new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 10000)),
           ]);
-          _wdFails = 0; // reset sur succès
+          _wdFails = 0;
         } catch (e) {
           _wdFails++;
           console.log(`[${sanitized}] ⚠️ Watchdog échec ${_wdFails}/3...`);
           if (_wdFails >= 3) {
-            // 3 échecs consécutifs = zombie confirmé → reconnexion
             console.log(`[${sanitized}] 🔴 Zombie confirmé après 3 échecs, reconnexion...`);
             clearWatchdog(sanitized);
             store.deleteSession(sanitized);
@@ -233,7 +259,7 @@ async function startSession(number) {
     if (connection === 'close') {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       const reason = lastDisconnect?.error?.output?.payload?.error || statusCode;
-      console.log(`[${sanitized}] Connection closed. Reason: ${reason} (code: ${statusCode})`);
+      console.log(`[${sanitized}] Connexion fermée. Raison: ${reason} (code: ${statusCode})`);
 
       clearWatchdog(sanitized);
       pendingSockets.delete(sanitized);
@@ -242,12 +268,10 @@ async function startSession(number) {
         store.deleteSession(sanitized);
         fs.removeSync(sessionPath);
         msgCaches.delete(sanitized);
-        console.log(`[${sanitized}] Session deleted (logout)`);
+        console.log(`[${sanitized}] Session supprimée (logout)`);
       } else if (statusCode === DisconnectReason.restartRequired || statusCode === 515) {
-        // BUG FIX: supprimer la session du store avant de reconnecter,
-        // sinon reconnectSession() voit l'ancienne session morte et abandonne.
         store.deleteSession(sanitized);
-        console.log(`[${sanitized}] Restart required, reconnecting in 2s...`);
+        console.log(`[${sanitized}] Redémarrage requis, reconnexion dans 2s...`);
         setTimeout(() => reconnectSession(sanitized), 2000);
       } else if (RECONNECT_CODES && RECONNECT_CODES.has(statusCode)) {
         store.deleteSession(sanitized);
@@ -255,7 +279,7 @@ async function startSession(number) {
         setTimeout(() => reconnectSession(sanitized), 8000);
       } else {
         store.deleteSession(sanitized);
-        console.log(`[${sanitized}] Reconnecting in 5s...`);
+        console.log(`[${sanitized}] Reconnexion dans 5s...`);
         setTimeout(() => reconnectSession(sanitized), 5000);
       }
     }
@@ -263,7 +287,6 @@ async function startSession(number) {
 
   if (!sock.authState.creds.registered) {
     // Attendre que le WebSocket soit vraiment ouvert avant de demander le code
-    // (l'ancien delay(3000) était une course — parfois la connexion n'était pas prête)
     try {
       console.log(`[${sanitized}] En attente de la connexion WebSocket...`);
       await waitForConnecting(sock, 25000);
@@ -271,7 +294,7 @@ async function startSession(number) {
     } catch (connErr) {
       pendingSockets.delete(sanitized);
       try { sock.end(); } catch (_) {}
-      throw new Error(`Connection Closed: ${connErr.message}`);
+      throw new Error(`Connexion fermée: ${connErr.message}`);
     }
 
     // Petit buffer de stabilisation
@@ -281,14 +304,14 @@ async function startSession(number) {
     let lastError;
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        console.log(`[${sanitized}] Pairing code — tentative ${attempt}/3 (version ${version.join('.')})...`);
+        console.log(`[${sanitized}] Code de jumelage — tentative ${attempt}/3 (version ${version.join('.')})...`);
         const code = await sock.requestPairingCode(sanitized);
         const formattedCode = code?.match(/.{1,4}/g)?.join('-') || code;
         console.log(`[${sanitized}] ✅ Code: ${formattedCode}`);
 
         setTimeout(() => {
           if (pendingSockets.has(sanitized)) {
-            console.log(`[${sanitized}] Pairing timeout (5min), cleaning pending socket`);
+            console.log(`[${sanitized}] Timeout jumelage (5min), nettoyage`);
             pendingSockets.delete(sanitized);
           }
         }, 5 * 60 * 1000);
@@ -304,7 +327,7 @@ async function startSession(number) {
     // Toutes les tentatives échouées
     pendingSockets.delete(sanitized);
     try { sock.end(); } catch (_) {}
-    throw new Error(`Pairing code failed after 3 attempts: ${lastError?.message}`);
+    throw new Error(`Code de jumelage impossible après 3 tentatives: ${lastError?.message}`);
   }
 
   pendingSockets.delete(sanitized);
@@ -319,7 +342,7 @@ async function reconnectSession(sanitized) {
   try {
     await startSession(sanitized);
   } catch (e) {
-    console.error(`[${sanitized}] Reconnection error:`, e.message);
+    console.error(`[${sanitized}] Erreur reconnexion:`, e.message);
     setTimeout(() => reconnectSession(sanitized), 15000);
   }
 }
@@ -330,13 +353,13 @@ async function startExistingSessions() {
     const p = path.join(config.SESSION_BASE_PATH, d);
     return fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
   });
-  console.log(`[BOT] ${dirs.length} existing session(s) to restore`);
+  console.log(`[BOT] ${dirs.length} session(s) existante(s) à restaurer`);
   for (const dir of dirs) {
     try {
       await startSession(dir);
       await delay(2000);
     } catch (e) {
-      console.error(`[BOT] Session error ${dir}:`, e.message);
+      console.error(`[BOT] Erreur session ${dir}:`, e.message);
     }
   }
 }
