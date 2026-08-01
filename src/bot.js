@@ -25,6 +25,24 @@ const watchdogs = new Map();
 
 const FALLBACK_VERSION = [2, 3000, 1023596128];
 
+// Attendre que le WebSocket soit en état 'connecting' (prêt pour le pairing code)
+// Timeout en ms, rejette si la connexion se ferme avant
+function waitForConnecting(sock, timeoutMs = 20000) {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('WebSocket connection timeout')), timeoutMs);
+    const handler = sock.ev.on('connection.update', ({ connection }) => {
+      if (connection === 'connecting' || connection === 'open') {
+        clearTimeout(t);
+        // Pas de unsubscribe nécessaire, le handler principal prend le relais
+        resolve();
+      } else if (connection === 'close') {
+        clearTimeout(t);
+        reject(new Error('Connection Closed before pairing code'));
+      }
+    });
+  });
+}
+
 async function getVersion() {
   try {
     const { version } = await fetchLatestBaileysVersion();
@@ -37,9 +55,11 @@ async function getVersion() {
 }
 
 function getBrowserValue() {
-  if (typeof Browsers?.macOS === 'function') return Browsers.macOS('Safari');
-  if (Array.isArray(Browsers?.macOS)) return Browsers.macOS;
-  return ['Ubuntu', 'Chrome', '22.0.0'];
+  // Ubuntu Chrome fonctionne mieux que macOS Safari sur les hébergements cloud
+  // (Railway, Render) — WhatsApp le bloque moins souvent
+  if (typeof Browsers?.ubuntu === 'function') return Browsers.ubuntu('Chrome');
+  if (typeof Browsers?.macOS === 'function') return Browsers.macOS('Chrome');
+  return ['Ubuntu', 'Chrome', '120.0.6099.119'];
 }
 
 function clearWatchdog(sanitized) {
@@ -73,8 +93,8 @@ async function startSession(number) {
       keys: makeCacheableSignalKeyStore(state.keys, logger),
     },
     browser: getBrowserValue(),
-    connectTimeoutMs: 30000,
-    defaultQueryTimeoutMs: 30000,
+    connectTimeoutMs: 60000,
+    defaultQueryTimeoutMs: 60000,
     keepAliveIntervalMs: 10000,
     retryRequestDelayMs: 250,
     generateHighQualityLinkPreview: false,
@@ -242,28 +262,49 @@ async function startSession(number) {
   });
 
   if (!sock.authState.creds.registered) {
-    await delay(3000);
+    // Attendre que le WebSocket soit vraiment ouvert avant de demander le code
+    // (l'ancien delay(3000) était une course — parfois la connexion n'était pas prête)
     try {
-      console.log(`[${sanitized}] Requesting pairing code (version ${version.join('.')})...`);
-      const code = await sock.requestPairingCode(sanitized);
-      const formattedCode = code?.match(/.{1,4}/g)?.join('-') || code;
-      console.log(`[${sanitized}] ✅ Code: ${formattedCode}`);
-
-      setTimeout(() => {
-        if (pendingSockets.has(sanitized)) {
-          console.log(`[${sanitized}] Pairing timeout (5min), cleaning pending socket`);
-          pendingSockets.delete(sanitized);
-        }
-      }, 5 * 60 * 1000);
-
-      return { sock, code: formattedCode };
-    } catch (err) {
-      const realError = err?.message || String(err);
-      console.error(`[${sanitized}] requestPairingCode error:`, realError);
+      console.log(`[${sanitized}] En attente de la connexion WebSocket...`);
+      await waitForConnecting(sock, 25000);
+      console.log(`[${sanitized}] WebSocket connecté, demande du code de jumelage...`);
+    } catch (connErr) {
       pendingSockets.delete(sanitized);
       try { sock.end(); } catch (_) {}
-      throw new Error(`Pairing code failed: ${realError}`);
+      throw new Error(`Connection Closed: ${connErr.message}`);
     }
+
+    // Petit buffer de stabilisation
+    await delay(1500);
+
+    // Jusqu'à 3 tentatives avec délai croissant entre chaque
+    let lastError;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.log(`[${sanitized}] Pairing code — tentative ${attempt}/3 (version ${version.join('.')})...`);
+        const code = await sock.requestPairingCode(sanitized);
+        const formattedCode = code?.match(/.{1,4}/g)?.join('-') || code;
+        console.log(`[${sanitized}] ✅ Code: ${formattedCode}`);
+
+        setTimeout(() => {
+          if (pendingSockets.has(sanitized)) {
+            console.log(`[${sanitized}] Pairing timeout (5min), cleaning pending socket`);
+            pendingSockets.delete(sanitized);
+          }
+        }, 5 * 60 * 1000);
+
+        return { sock, code: formattedCode };
+      } catch (err) {
+        lastError = err;
+        console.warn(`[${sanitized}] Tentative ${attempt} échouée: ${err.message}`);
+        if (attempt < 3) await delay(4000 * attempt); // 4s, puis 8s
+      }
+    }
+
+    // Toutes les tentatives échouées
+    pendingSockets.delete(sanitized);
+    try { sock.end(); } catch (_) {}
+    throw new Error(`Pairing code failed after 3 attempts: ${lastError?.message}`);
   }
 
   pendingSockets.delete(sanitized);
